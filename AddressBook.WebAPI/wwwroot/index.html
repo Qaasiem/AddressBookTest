@@ -1,60 +1,202 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Address Book</title>
-    <link rel="stylesheet" href="AddressBookStyles.css" />
+    <title>Realm Address Book</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="StyleSheet.css">
+    <script src="./jquery-1.10.2.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            var ulEmployees = $('#ulEmployees');
+            $('#getContacts').click(function () {
+                $.ajax({
+                    type: 'GET',
+                    url: "/getAllContactAddress",
+                    dataType: 'json',
+                    success: function (data) {
+                        ulEmployees.empty();
+                        $.each(data, function (val) {
+                            console.log(data[val]);
+                            var fullName = data[val].firstName + ' ' + data[val].lastName + ' ' + data[val].contactNumber + ' ' + data[val].emailAddress + '<br>';
+
+                            ulEmployees.append(fullName);
+                        });
+                    }
+                });
+            });
+
+            var ulEmployeessss = $('#ulEmployeessss');
+            $('#getContact').click(function () {
+                var addressData = {
+                    FirstName: $('#searchTerm').val(),
+                };
+                $.ajax({
+                    type: "POST",
+                    url: "/getContactAddress",
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(addressData),
+                    success: function (addressData) {
+                        ulEmployeessss.empty();
+                        $.each(addressData, function (val) {
+                            console.log(addressData[val]);
+                            var fullNames = addressData[val]
+
+                            ulEmployeessss.append(fullNames);
+                        });
+                    }
+                });
+            });
+
+            $('#addContact').click(function () {
+                var addressData = {
+                    FirstName: $('#firstName').val(),
+                    LastName: $('#lastName').val(),
+                    ContactNumber: $('#contactNumber').val(),
+                    EmailAddress: $('#emailAddress').val(),
+                };
+                $.ajax({
+                    type: "POST",
+                    url: "/createAdrress",
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(addressData),
+                    success: function (addressData) {
+                        $('#response pre').html(JSON.stringify(addressData));
+                        alert('Succesfully added Contact');
+                    },
+                    error: function () {
+                        alert('Contact already exist');
+                    }
+                })
+            });
+
+            $('#deleteContact').click(function () {
+                var addressData = {
+                    FirstName: $('#deleteFirstName').val(),
+                    LastName: $('#deleteLastName').val(),
+                };
+                $.ajax({
+                    type: "POST",
+                    url: "/deleteContactAddress",
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(addressData),
+                    success: function (addressData) {
+                        $('#response pre').html(JSON.stringify(addressData));
+                        alert('success');
+                    },
+                    error: function () {
+                        alert('Error occured while attempting to delete contact');
+                    }
+                })
+            });
+
+            $('#updateContact').click(function () {
+                var addressData = {
+                    FirstName: $('#updateFirstName').val(),
+                    LastName: $('#updateLastName').val(),
+                    ContactNumber: $('#updateContactNumber').val(),
+                    EmailAddress: $('#updateEmailAddress').val(),
+                };
+                $.ajax({
+                    type: "POST",
+                    url: "/updateContact",
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(addressData),
+                    success: function (addressData) {
+                        $('#response pre').html(JSON.stringify(addressData));
+                        alert('success');
+                    },
+                    error: function () {
+                        alert('Error occured while attempting to update contact');
+                    }
+                })
+            });
+
+        });
+    </script>
 </head>
 <body>
-    <h1>My Address Book</h1>
-    <h3>Add Contact</h3>
-    <form action="javascript:void(0);" method="POST" onsubmit="CreateContact()">
 
-        <div class="AddContactDetails">
-            <input type="text" id="firstName" placeholder="First Name">
-            <br>
-            <br>
-            <input type="text" id="lastName" placeholder="Last Name">
-            <br>
-            <br>
-            <input type="text" id="contactNumber" placeholder="Contact Number">
-            <br>
-            <br>
-            <input type="text" id="EmailAddress" placeholder="Email Address" align="center">
-            <br>
-            <br>
-        </div>
-
-        <input type="submit" value="Add">
-
-    </form>
-
-    <div id="editForm">
-        <h3>Edit</h3>
-        <form action="javascript:void(0);" onsubmit="updateItem()">
-            <input type="hidden" id="edit-id">
-            <input type="checkbox" id="edit-isComplete">
-            <input type="text" id="edit-name">
-            <input type="submit" value="Save">
-            <a onclick="closeInput()" aria-label="Close">&#10006;</a>
-        </form>
+    <div class="Heading">
+        <h1>Realm Address Book</h1>
     </div>
 
-    <p id="counter"></p>
+    <div class="RegisterContact">
+        <h1>Register Contact</h1>
+        <br>
+        <input id="firstName" type="text" placeholder="First Name" />
+        <br>
+        <br>
+        <input id="lastName" type="text" placeholder="Last Name" />
+        <br>
+        <br>
+        <input id="contactNumber" type="text" placeholder="Contact Number" />
+        <br>
+        <br>
+        <input id="emailAddress" type="text" placeholder="Email Address" />
+        <br>
+        <br>
+        <br>
+        <input id="addContact" type="button" value="Add Contact" />
+    </div>
 
-    <table>
-        <tr>
-            <th>Is Complete?</th>
-            <th>Name</th>
-            <th></th>
-            <th></th>
-        </tr>
-        <tbody id="todos"></tbody>
-    </table>
+    <div class="GetContact">
+        <h1>Search Contact</h1>
+        <br>
+        <input id="searchTerm" type="text" placeholder="First Name" />
+        <br>
+        <br>
+        <input id="getContact" type="button" value="Search" />
+    </div>
 
-    <script src="js/site.js" asp-append-version="true"></script>
-    <script type="text/javascript">
-        getItems();
-    </script>
+    <div class="UpdateContact">
+        <h1>Update Contact</h1>
+        <br>
+        <input id="updateFirstName" type="text" placeholder="First Name" />
+        <br>
+        <br>
+        <input id="updateLastName" type="text" placeholder="Last Name" />
+        <br>
+        <br>
+        <input id="updateContactNumber" type="text" placeholder="Contact Number" />
+        <br>
+        <br>
+        <input id="updateEmailAddress" type="text" placeholder="Email Address" />
+        <br>
+        <br>
+        <br>
+        <input id="updateContact" type="button" value="Update Contact" />
+    </div>
+
+    <div class="DeleteContact">
+        <h1>Delete Contact</h1>
+        <br>
+        <input id="deleteFirstName" type="text" placeholder="First Name" />
+        <br>
+        <br>
+        <input id="deleteLastName" type="text" placeholder="Last Name" />
+        <br>
+        <br>
+        <br>
+        <input id="deleteContact" type="button" value="Delete Contact" />
+    </div>
+
+    <div class="GetContacts">
+        <input id="getContacts" type="button" value="Get All Employees" />
+    </div>
+
+    <div class="ContactsGrid">
+        <ul id="ulEmployees" />
+    </div>
+
+    <div class="ContactGrid">
+        <ul id="ulEmployeessss" />
+    </div>
+    
+
 </body>
 </html>

@@ -1,8 +1,10 @@
 ﻿using AddressBook.Config;
 using AddressBook.Models;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;
 
@@ -27,13 +29,24 @@ namespace AddressBook.DAL
         {
             try
             {
+                var filter = Builders<AddressDetails>.Filter.Eq(a => a.FirstName, addressDetails.FirstName) &
+                    Builders<AddressDetails>.Filter.Eq(a => a.LastName, addressDetails.LastName);
+
+                var result = _addressCollection.Find(filter);
+
+                if (result.CountDocuments() > 0)
+                {
+                    throw new Exception("Contact already exists");
+                }
+
+
                 _addressCollection
                     .InsertOne(addressDetails);
 
                 return true;
 
             }
-            catch(DbException ex)
+            catch (DbException ex)
             {
                 throw;
             }
@@ -44,12 +57,17 @@ namespace AddressBook.DAL
         {
             try
             {
-                var filter = Builders<AddressDetails>.Filter.Eq(a => a.FirstName, addressDetails.FirstName);
-
-                var addressContact = Builders<AddressDetails>
+                var updateAddressContact = Builders<AddressDetails>
                 .Update
                 .Set(a => a.FirstName, addressDetails.FirstName)
-                .Set(a => a.LastName, addressDetails.LastName);
+                .Set(a => a.LastName, addressDetails.LastName)
+                .Set(a => a.ContactNumber, addressDetails.ContactNumber)
+                .Set(a => a.EmailAddress, addressDetails.EmailAddress);
+
+                var result = _addressCollection.FindOneAndUpdate(
+                    Builders<AddressDetails>.Filter.Eq(a => a.FirstName, addressDetails.FirstName) &
+                    Builders<AddressDetails>.Filter.Eq(a => a.LastName, addressDetails.LastName),
+                    updateAddressContact);
 
                 return true;
 
@@ -60,16 +78,16 @@ namespace AddressBook.DAL
             }
         }
 
-        public AddressDetails GetContact(string firstName)
+        public AddressDetails GetContact(SearchTermModel searchTerm)
         {
             try
             {
-                var filter = Builders<AddressDetails>.Filter.Eq(a => a.FirstName, firstName);
+                var filter = Builders<AddressDetails>.Filter.Eq(a => a.FirstName, searchTerm.FirstName);
 
                 var addressContact = _addressCollection
                 .Find(filter)
                 .FirstOrDefault();
-               
+
                 return addressContact;
 
             }
@@ -79,11 +97,26 @@ namespace AddressBook.DAL
             }
         }
 
-        public bool DeleteContact(string firstName)
+        public async Task<List<AddressDetails>> GetContactAll()
         {
             try
             {
-                var filter = Builders<AddressDetails>.Filter.Eq(a => a.FirstName, firstName);
+                var result = await _addressCollection.Find(new BsonDocument()).ToListAsync();
+
+                return result;
+            }
+            catch (DbException ex)
+            {
+                throw;
+            }
+        }
+
+        public bool DeleteContact(DeleteContact deleteContact)
+        {
+            try
+            {
+                var filter = Builders<AddressDetails>.Filter.Eq(a => a.FirstName, deleteContact.FirstName) &
+                 Builders<AddressDetails>.Filter.Eq(a => a.LastName, deleteContact.LastName);
 
                 var addressContact = _addressCollection
                 .DeleteOne(filter);

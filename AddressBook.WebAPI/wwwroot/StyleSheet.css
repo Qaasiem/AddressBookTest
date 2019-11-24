@@ -1,0 +1,54 @@
+﻿body {
+    background-image: url("1.jpg");
+    height: 100%;
+    width: 100%;
+}
+
+.Heading {
+    position: absolute;
+    right: 38%;
+    top: 3%;
+}
+
+.RegisterContact {
+    position: absolute;
+    left: 41%;
+    top: 17%;
+}
+
+.UpdateContact {
+    position: absolute;
+    right: 42%;
+    top: 72%;
+}
+
+.DeleteContact {
+    position: absolute;
+    right: 43%;
+    top: 125%;
+}
+
+.GetContacts {
+    position: absolute;
+    top: 193%;
+    right: 46%;
+}
+
+.ContactsGrid {
+    position: absolute;
+    top: 197%;
+    right: 37%
+}
+
+.ContactGrid {
+    position: absolute;
+    top: 183%;
+    right: 21%;
+}
+
+.GetContact {
+    position: absolute;
+    top: 163%;
+    right: 42%;
+}
+

@@ -2,10 +2,12 @@
 using AddressBook.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AddressBook.WebAPI.Controller.V1
 {
-    [Route("api/[controller]")]
+    [Route("api")]
     [ApiController]
     public class AddressBookController : ControllerBase
     {
@@ -22,7 +24,7 @@ namespace AddressBook.WebAPI.Controller.V1
         /// </summary>
         /// <param name="addressDetails"></param>
         [HttpPost]
-        [Route("/createAdress")]
+        [Route("/createAdrress")]
         public bool CreateContact([FromBody]AddressDetails addressDetails)
         {
 
@@ -43,14 +45,35 @@ namespace AddressBook.WebAPI.Controller.V1
         /// Retrieves a contact using first name
         /// </summary>
         /// <returns>AddressDetails</returns>
-        [HttpGet]
+        [HttpPost]
         [Route("/getContactAddress")]
-        public AddressDetails GetContactAddress(string firstName)
+        public AddressDetails GetContactAddress(SearchTermModel searchTerm)
         {
 
             try
             {
-                var addressContact = _addressBookEngine.RequestToRetrieveContact(firstName);
+                var addressContact = _addressBookEngine.RequestToRetrieveContact(searchTerm);
+
+                return addressContact;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to retrieve contact", ex);
+            }
+        }
+
+        /// <summary>
+        /// Retrieves all contacts
+        /// </summary>
+        /// <returns>AddressDetails</returns>
+        [HttpGet]
+        [Route("/getAllContactAddress")]
+        public async Task<List<AddressDetails>> GetAllContactAddress()
+        {
+
+            try
+            {
+                var addressContact = await _addressBookEngine.RequestToRetrieveAllContact();
 
                 return addressContact;
             }
@@ -65,7 +88,7 @@ namespace AddressBook.WebAPI.Controller.V1
         /// </summary>
         /// <param name="addressDetails"></param>
         /// <returns>bool</returns>
-        [HttpGet]
+        [HttpPost]
         [Route("/updateContact")]
         public bool UpdateAddress(UpdateAddressDetails addressDetails)
         {
@@ -87,14 +110,14 @@ namespace AddressBook.WebAPI.Controller.V1
         /// Retrieves a contact using first name
         /// </summary>
         /// <returns>AddressDetails</returns>
-        [HttpGet]
+        [HttpPost]
         [Route("/deleteContactAddress")]
-        public bool DeleteContactAddress(string firstName)
+        public bool DeleteContactAddress([FromBody]DeleteContact deleteContact)
         {
 
             try
             {
-                _addressBookEngine.RequestToDeleteContact(firstName);
+                _addressBookEngine.RequestToDeleteContact(deleteContact);
 
                 return true;
             }
